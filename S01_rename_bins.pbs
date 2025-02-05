@@ -8,7 +8,7 @@
 ##      Load environment              ##
 ########################################
 
-cd /home/datawork-lmee-intranet-nos/IRON2MI/LUDIVINE/01_metagenomic_mat/MARION/01_FASTA/FASTA
+cd $iron_nos/01_FASTA/FASTA
 
 for i in *.fa
 do name=$(basename $i .fa | tr '[:punct:]' '_')
