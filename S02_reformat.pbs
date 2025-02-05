@@ -9,10 +9,13 @@
 ##      Load environment              ##
 ########################################
 
+# Load tool : path to the tool
 . /appli/bioinfo/anvio/8_dev/env.sh
 
-cd /home/datawork-lmee-intranet-nos/IRON2MI/LUDIVINE/01_metagenomic_mat/MARION/01_FASTA
+# Path to working directory
+cd $iron_nos/01_FASTA
 
+# Reformat fasta files
 for i in FASTA/*.fa
 do prefix=$(basename $i .fa)
 anvi-script-reformat-fasta $i -o REFORMATED/"$prefix"_reformated.fa --prefix $prefix --simplify-names -r reformated.txt

@@ -16,15 +16,14 @@ module load singularity/3.4.1
 # Checkm2 singularity container
 CHECKM2_SIF=/appli/bioinfo/checkm2/1.0.1/checkm2-1.0.1.sif
 
-# Il faut créer des variables pour les chemins des dossiers pour cette commande
-path=/home/datawork-lmee-intranet-nos/IRON2MI/LUDIVINE/01_metagenomic_mat/MARION
-inputdir=$path/01_FASTA/REFORMATED
-outputdir=$path/02_QUALITY/CheckM2
+# Creat variable for work directory pathway
+inputdir=$iron_nos/01_FASTA/REFORMATED
+outputdir=$iron_nos/02_QUALITY/CheckM2
 
-cd $path
+cd $iron_nos
 
 #Run Checkm2
-singularity run -B /appli -B /home/ref-bioinfo/ifremer/sebimer/tool-specific-banks/checkm2/1.0.1/ -B $DATAWORK  ${CHECKM2_SIF} checkm2 predict --thread 30 --input $inputdir -x fa --output-directory $outputdir >& $path/00_LOGS/CheckM2.log 2>&1
+singularity run -B /appli -B /home/ref-bioinfo/ifremer/sebimer/tool-specific-banks/checkm2/1.0.1/ -B $DATAWORK  ${CHECKM2_SIF} checkm2 predict --thread 30 --input $inputdir -x fa --output-directory $outputdir >& $iron_nos/00_LOGS/CheckM2.log 2>&1
 
 
 

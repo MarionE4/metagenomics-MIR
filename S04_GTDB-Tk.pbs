@@ -9,17 +9,18 @@
 ##      Load environment              ##
 ########################################
 
-# Charger l'outil : donner le chemin vers l'outil
+# Load tool : path to the tool
 . /appli/bioinfo/gtdbtk/2.4.0/env.sh
 
-# Le chemin vers le dossier de travail : toujours le donner
-cd /home/datawork-lmee-intranet-nos/IRON2MI/LUDIVINE/01_metagenomic_mat/MARION 
+# Path to working directory
+cd $iron_nos
 
 # Workflow GTDB-Tk
 gtdbtk classify_wf --genome_dir 01_FASTA/REFORMATED --out_dir 03_TAXONOMY/GTDB-Tk -x fa --cpus 56 --skip_ani_screen
 
-# Penser à rajouter l'argument extension et le nombre de coeur
-# L'argument --skip_ani_screen saute l'étape de comparaison par ANI des génomes avec la base de données Mash, une étape qui prends du temps...
+# Add extension arguement -x and number of threads --cpus
+# --skip_ani_screen allow to skip comparison genome ANI with Mash database, a time-consuming stage and unecessary for us
+
 
 
 
