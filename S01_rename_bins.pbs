@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#PBS -l mem=1G
+#PBS -q sequentiel
+#PBS -l walltime=1:00:00
+#PBS -m n
+
+########################################
+##      Load environment              ##
+########################################
+
+cd /home/datawork-lmee-intranet-nos/IRON2MI/LUDIVINE/01_metagenomic_mat/MARION/01_FASTA/FASTA
+
+for i in *.fa
+do name=$(basename $i .fa | tr '[:punct:]' '_')
+mv $i "$name".fa
+done
+
+

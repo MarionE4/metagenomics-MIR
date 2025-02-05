@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#PBS -l mem=4G
+#PBS -q omp
+#PBS -l ncpus=2
+#PBS -l walltime=2:00:00
+#PBS -m n
+
+########################################
+##      Load environment              ##
+########################################
+
+. /appli/bioinfo/anvio/8_dev/env.sh
+
+cd /home/datawork-lmee-intranet-nos/IRON2MI/LUDIVINE/01_metagenomic_mat/MARION/01_FASTA
+
+for i in FASTA/*.fa
+do prefix=$(basename $i .fa)
+anvi-script-reformat-fasta $i -o REFORMATED/"$prefix"_reformated.fa --prefix $prefix --simplify-names -r reformated.txt
+done
+
+
