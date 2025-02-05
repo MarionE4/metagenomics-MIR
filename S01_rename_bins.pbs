@@ -10,6 +10,7 @@
 
 cd $iron_nos/01_FASTA/FASTA
 
+# Loop for renaming bins
 for i in *.fa
 do name=$(basename $i .fa | tr '[:punct:]' '_')
 mv $i "$name".fa
