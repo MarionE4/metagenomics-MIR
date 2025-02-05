@@ -21,4 +21,3 @@ do prefix=$(basename $i .fa)
 anvi-script-reformat-fasta $i -o REFORMATED/"$prefix"_reformated.fa --prefix $prefix --simplify-names -r reformated.txt
 done
 
-
