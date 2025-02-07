@@ -15,7 +15,7 @@
 # Path to working directory
 cd $iron_nos/01_FASTA
 
-# Reformat fasta files
+# Reformat fasta files : in fasta file, replace bin name by the rename bin name (sccript S01)
 for i in FASTA/*.fa
 do prefix=$(basename $i .fa)
 anvi-script-reformat-fasta $i -o REFORMATED/"$prefix"_reformated.fa --prefix $prefix --simplify-names -r reformated.txt
