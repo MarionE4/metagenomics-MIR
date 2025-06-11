@@ -1,0 +1,15 @@
+
+### This script creates a symbolic link from our MAGs to our workspace.
+
+# Create a file with all Zetaproteobacteria MAGs
+grep "Zetaproteobacteria" ../MAGs_all.tsv > ../zeta_all.tsv
+
+# Create a file with medium quality Zetaproteobacteria MAGs
+grep "Zetaproteobacteria" ../MAGs_MQ.tsv > ../zeta_MQ.tsv
+# MAGs MQ c'est complétion >70% et redondance <5%
+
+# Loop to make symbolic link of MAGs
+cut -f1 ../MAGs_MQ.tsv | while read i ; do ln -s ../../01_FASTA/REFORMATED/"$i".fa . ; done
+
+cd /home/datawork-lmee-intranet-nos/IRON2MI/LUDIVINE/01_metagenomic_mat/MARION/04_MAGs/ZETA_MQ
+cut -f1 ../zeta_MQ.tsv | while read i ; do ln -s ../../01_FASTA/REFORMATED/"$i".fa . ; done

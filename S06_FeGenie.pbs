@@ -1,0 +1,8 @@
+
+
+# Workflow FeGenie
+FeGenie.py -bin_dir ../04_MAGs/MAGs_SELECTED/ -bin_ext fa -out fegenie -T 24
+
+# Add extension arguement -bin_ext 
+# -T for number of threads
+

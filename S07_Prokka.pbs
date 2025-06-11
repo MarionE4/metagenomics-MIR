@@ -1,0 +1,15 @@
+
+
+# Workflow Prokka
+for i in ../04_MAGs/MAGs_SELECTED/*.fa
+do 
+BASENAME=$(basename "$i") # to get only the file name and not its path with the extension
+BIN=$(echo "$BASENAME" | grep -oP '^bin\d+') 
+prokka $i --outdir prokka/$BIN --prefix $BIN
+done 
+
+# -o displays only the part of the text corresponding to the selection that follows; without -o, the entire line containing the selection would be displayed. 
+# -P activates Perl-compatible regular expressions mode, enabling you to use the \d+ (digits) expression, among others.
+# ^bin searches for a name starting with bin 
+# \d+ retrieves all digits following bin
+

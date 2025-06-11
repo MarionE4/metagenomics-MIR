@@ -1,19 +1,8 @@
-#!/usr/bin/env bash
-#PBS -l mem=1G
-#PBS -q sequentiel
-#PBS -l walltime=1:00:00
-#PBS -m n
-
-########################################
-##      Load environment              ##
-########################################
-
-cd $iron_nos/01_FASTA/FASTA
 
 # Loop for renaming bins
 for i in *.fa
-do name=$(basename $i .fa | tr '[:punct:]' '_')
+do name=$(basename $i .fa | tr '[:punct:]' '_') # replace every punctuations by _
 mv $i "$name".fa
-done
+done 
 
 

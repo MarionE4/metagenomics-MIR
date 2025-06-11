@@ -1,26 +1,17 @@
-#!/usr/bin/env bash
-#PBS -l mem=160G
-#PBS -q omp
-#PBS -l ncpus=60
-#PBS -l walltime=12:00:00
-#PBS -m n
 
-########################################
-##      Load environment              ##
-########################################
+### Workflow GTDB-Tk
 
-# Load tool : path to the tool
-. /appli/bioinfo/gtdbtk/2.4.0/env.sh
-
-# Path to working directory
-cd $iron_nos
-
-# Workflow GTDB-Tk
-gtdbtk classify_wf --genome_dir 01_FASTA/REFORMATED --out_dir 03_TAXONOMY/GTDB-Tk -x fa --cpus 56 --skip_ani_screen
+gtdbtk classify_wf --genome_dir 01_FASTA/REFORMATED --out_dir 03_TAXONOMY/GTDB-Tk -x fa --cpus 56 --skip_ani_screen 
 
 # Add extension arguement -x and number of threads --cpus
 # --skip_ani_screen allow to skip comparison genome ANI with Mash database, a time-consuming stage and unecessary for us
 
+
+### Creation of an alignment file of the MAGs selected for the phylogenomic tree
+
+gtdbtk identify --cpus 33 -x fa --genome_dir 04_MAGs/MAGs_SELECTED --out_dir 03_TAXONOMY/GTDB-Tk/02_selected/identify_bis 
+
+gtdbtk align --cpus 33 --identify_dir 03_TAXONOMY/GTDB-Tk/02_selected/identify --out_dir 03_TAXONOMY/GTDB-Tk/02_selected/align_bis 
 
 
 
