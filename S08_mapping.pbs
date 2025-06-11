@@ -1,0 +1,26 @@
+
+
+### On DATARMOR there is already a script for realising the mapping, you just need to complete tto you directory
+
+########################################
+##      Execute script                ##
+########################################
+TIMESTAMP=$(date +%Y-%m-%d_%Hh%Mm%Ss)
+LOG="S08_mapping"_"$TIMESTAMP"".log"
+
+anvi-run-workflow -w metagenomics \
+                  -c path/to/config.json \
+                  --additional-params \
+                      --directory path/to/06_MAPPING \
+                      --jobs 20 \
+                      --latency-wait 420 \
+                      --cluster-config path/to/cluster.yml \
+		      --rerun-triggers mtime \
+                      --cluster \
+                          "qsub -N {rule} \
+                                -m n \
+                                -q {cluster.queue} \
+                                -l walltime={cluster.walltime} \
+                                -l mem={cluster.memory} \
+                                -l ncpus={threads} \
+                                -V" >> path/to/00_LOGS/$LOG 2>&1

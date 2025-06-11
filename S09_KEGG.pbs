@@ -1,0 +1,18 @@
+
+# Creation of contigs.db
+for i in MAGs_SELECTED/*.fa
+do 
+BIN=$(basename $i | cut -f1 -d '_') # Get the bin with its number.
+anvi-gen-contigs-database -f $i -o MAGs_SELECTED_db/$BIN.db
+done 
+# && allows you to execute the next loop if it succeeds: prevents the server from executing on files not yet generated (=make me loop 1 before loop 2). 
+
+
+# Workflow KEGG Kofams
+for j in MAGs_SELECTED_db/*.db
+do
+anvi-run-kegg-kofams -c $j -T 20
+done 
+
+
+
