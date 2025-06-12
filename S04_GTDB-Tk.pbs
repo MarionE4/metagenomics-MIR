@@ -1,6 +1,8 @@
 
 ### Workflow GTDB-Tk
 
+# Load GTDB-Tk v.2.4.0: path to the tool
+
 gtdbtk classify_wf --genome_dir 01_FASTA/REFORMATED --out_dir 03_TAXONOMY/GTDB-Tk -x fa --cpus 56 --skip_ani_screen 
 
 # Add extension arguement -x and number of threads --cpus

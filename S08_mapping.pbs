@@ -2,6 +2,8 @@
 
 ### On DATARMOR there is already a script for realising the mapping, you just need to complete tto you directory
 
+# Load Anvio v.8_dev: path to the tool
+
 ########################################
 ##      Execute script                ##
 ########################################

@@ -1,4 +1,5 @@
 
+# Load prokka v.1.14.6: path to the tool
 
 # Workflow Prokka
 for i in ../04_MAGs/MAGs_SELECTED/*.fa

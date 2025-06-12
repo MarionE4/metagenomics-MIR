@@ -1,4 +1,5 @@
 
+# Load fegenie v.1.2: path to the tool
 
 # Workflow FeGenie
 FeGenie.py -bin_dir ../04_MAGs/MAGs_SELECTED/ -bin_ext fa -out fegenie -T 24
