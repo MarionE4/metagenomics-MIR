@@ -1,0 +1,66 @@
+
+
+### Put Zetaproteobacteria MAGs into a repertory for the tree
+cd path/to/02_zeta/MAGs_zeta
+cut -f1 ../../../04_MAGs/zeta_MQ.tsv | while read i ; do ln -s ../../../01_FASTA/REFORMATED/"$i".fa . ; done
+
+# Path to working directory
+cd path/to/working/directory
+
+
+### Phylogenomic tree with ALL Zetaproteobacteria ###
+
+## Do identification and alignment with GTDB-Tk
+# Load GTDB-Tk v.2.4.0: path to the tool
+gtdbtk identify --cpus 33 -x fa --genome_dir MAGs_zeta --out_dir identify &&
+gtdbtk align --cpus 33 --identify_dir identify --out_dir align --taxa_filter c__Zetaproteobacteria,c__Magnetococcia &&
+# --taxa_filter creates an alignment file with all available Zetaproteobacteria reference genomes and MAGs, Magnetococcia class corresponds to the outgroup
+
+## Unzip file
+cd align/align && 
+gunzip gtdbtk.bac120.msa.fasta.gz &&
+cd path/to/02_zeta &&
+
+## Trim the alignment sequence after unzipping the file
+# Load TrimAl v.1.4.1: path to the tool
+# We use the gtdbtk.bac120.msa.fasta file because in it we have our MAGs alignment with Zetaproteobacteria and the outgroup
+trimal -in align/align/gtdbtk.bac120.msa.fasta -out zeta_trim.fasta -gt 0.50 &&
+
+## Build the phylogenomic tree with ALL Zetaproteobacteria
+# Load IQTREE v.2.0.3: path to the tool
+iqtree -s zeta_trim.fasta -nt AUTO -ntmax $NCPUS -m WAG -bb 1000 -redo &&
+
+## Root the tree at the outgroup 
+# Load GTDB-Tk v.2.4.0: path to the tool
+gtdbtk root --input_tree zeta_trim.fasta.treefile --outgroup_taxon c__Magnetococcia --output_tree zeta.treefile
+
+
+
+
+### Phylogenomic tree with only my Zetaproteobacteria MAGs for the Heatmap ###
+cd path/to/03_zeta_heatmap && 
+
+## Do identification and alignment with GTDB-Tk
+# Load GTDB-Tk V.2.4.0: path to the tool
+gtdbtk identify --cpus 33 -x fa --genome_dir MAGs_zeta --out_dir identify && 
+gtdbtk align --cpus 33 --identify_dir identify --out_dir align --taxa_filter g__Magnetaquicoccus &&
+# Magnetaquicoccus genus is the outgroup, we need to add him to our MAGs alignment
+
+## Unzip file
+cd align/align &&
+gunzip gtdbtk.bac120.msa.fasta.gz &&
+cd path/to/03_zeta_heatmap &&
+
+## Trim the alignment sequence after unzipping the file
+# Load TrimAl v.1.4.1: path to the tool
+# We use the gtdbtk.bac120.msa.fasta file because in it we have our MAGs alignment with the outgroup
+trimal -in align/align/gtdbtk.bac120.msa.fasta -out zeta_HM_trim.fasta -gt 0.50 &&
+
+## Build the phylogenomic tree with our Zetaproteobacteria MAGs
+# Load IQTREE v.2.0.3: path to the tool
+iqtree -s zeta_HM_trim.fasta -nt 20 -m WAG -bb 1000 -redo &&
+
+## Root the tree at the outgroup 
+# Load GTDB-Tk v.2.4.0: path to the tool
+gtdbtk root --input_tree zeta_HM_trim.fasta.treefile --outgroup_taxon g__Magnetaquicoccus --output_tree zeta_HM.treefile
+

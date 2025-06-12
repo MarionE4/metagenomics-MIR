@@ -1,0 +1,10 @@
+
+# This script is used to create a file with the names of the contigs in each MAG, together with the name of the MAG to which each contig belongs.
+
+for split_name in `sqlite3 03_CONTIGS/MAG-contigs.db 'select split from splits_basic_info'`
+do 
+	MAG=`echo $split_name | awk 'BEGIN{FS="\_000000"}{print $1}'` # Get contig name (e.g. bin163_re_assembled_contigs_000000) and MAG name (e.g. bin163_re_assembly)
+	echo -e "$split_name\t$MAG" >> MAG-collection.txt # Write tab-separated names to a collection.txt (1 line per contig)
+done 
+
+# This collection.txt is use  

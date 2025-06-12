@@ -1,0 +1,18 @@
+
+
+# Load HMMER v.3.3.2: path to the tool
+
+# Path to working directory
+cd path/to/09_HMM
+
+# Build HHM profil from a alignment file of grcJ sequences (made before) 
+hmmbuild grcJ.hmm grcJ_alignement.fasta 
+
+cd path/to/05_ANNOTATION
+# Do the HMM search from .faa (prokka output)
+for ID in prokka/*/*.faa
+    do
+    name=$(basename $ID .faa)
+    hmmsearch ../09_HMM/grcJ.hmm $ID
+done  
+

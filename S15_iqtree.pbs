@@ -1,0 +1,11 @@
+
+# IQTREE tool is used to generate the phylogenomic tree
+
+# Load IQTREE v.2.0.3: path to the tool
+
+iqtree -s bacteria_trim.fasta -nt AUTO -ntmax 40 -m WAG -bb 1000 -redo
+
+# -ntmax : maximum number of threads
+# -nt AUTO : search and use the optimal number of threads
+
+

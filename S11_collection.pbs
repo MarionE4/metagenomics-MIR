@@ -1,0 +1,6 @@
+
+# this script is used to create the MAGs collection
+
+# Load Anvio v.8_dev: path to the tool
+
+anvi-import-collection MAG-collection.txt -p 06_MERGED/MAG/PROFILE.db -c 03_CONTIGS/MAG-contigs.db -C MAG_collection >> ../00_LOGS/${PBS_JOBNAME}.log 2>&1

@@ -1,0 +1,23 @@
+
+# Load DiTing v.0.95: path to the tool
+
+# Path to working directory
+cd path/to08_DiTing/01_clean_reads &&
+
+# Create a symbolic link 
+ln -s path/to/LUDIVINE/01_metagenomic_mat/02_anvio/01_QC/*F*.fastq.gz . &&
+
+# Loop to rename fastqc
+for i in *.fastq.gz
+  do name=$(echo $i | sed 's/F-QUALITY_PASSED_R//g')
+	mv $i $name
+done  
+
+# We need to load DiTing from GitHub because the database don't work on DATARMOR server
+cd path/to/08_DITING/ &&
+git clone https://github.com/xuechunxu/DiTing.git
+cp -r /appli/bioinfo/diting/0.95/DiTing/kofam_database DiTing/
+# -r for repository
+
+python DiTing/diting.py -r 01_clean_reads -o 02_Output_DiTing -n 38
+# diting.py is a script, we need to tell DATARMOR server to open and read this script in python language

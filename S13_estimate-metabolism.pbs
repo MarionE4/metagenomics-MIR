@@ -1,0 +1,6 @@
+
+# This script estimates the completion of metabolic pathways via KEGG
+
+# Load Anvio v.8_dev: path to the tool
+
+anvi-estimate-metabolism -p ../../06_MAPPING/06_MERGED/MAG/PROFILE.db -c ../../06_MAPPING/03_CONTIGS/MAG-contigs.db -C MAG_collection 
