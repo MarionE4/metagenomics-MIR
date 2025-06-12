@@ -1,4 +1,6 @@
 
+# Load Anvio v.8_dev: path to the tool
+
 # Creation of contigs.db
 for i in MAGs_SELECTED/*.fa
 do 
