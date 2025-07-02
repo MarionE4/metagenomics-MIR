@@ -16,12 +16,12 @@ done
 
 The MAGs were then reformatted to avoid any future problems (notably with Anvi'o). In a new repertory these lines are run.
 
-```{bash}
+``` bash
 # Reformat fasta files : in fasta file, in contig name, replace old bin name by the new bin name
 for i in FASTA/*.fa
 do prefix=$(basename $i .fa)
 anvi-script-reformat-fasta $i -o REFORMATED/"$prefix"_reformated.fa --prefix $prefix --simplify-names -r reformated.txt
-done 
+done
 ```
 
 ## MAG quality and taxonomy assignment
