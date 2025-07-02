@@ -11,5 +11,5 @@ grep "Zetaproteobacteria" ../MAGs_MQ.tsv > ../zeta_MQ.tsv
 # Loop to make symbolic link of MAGs
 cut -f1 ../MAGs_MQ.tsv | while read i ; do ln -s ../../01_FASTA/REFORMATED/"$i".fa . ; done
 
-cd /home/datawork-lmee-intranet-nos/IRON2MI/LUDIVINE/01_metagenomic_mat/MARION/04_MAGs/ZETA_MQ
+cd ../ZETA_MQ
 cut -f1 ../zeta_MQ.tsv | while read i ; do ln -s ../../01_FASTA/REFORMATED/"$i".fa . ; done
