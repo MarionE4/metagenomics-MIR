@@ -7,7 +7,7 @@ cd path/to08_DiTing/01_clean_reads &&
 # Create a symbolic link 
 ln -s path/to/LUDIVINE/01_metagenomic_mat/02_anvio/01_QC/*F*.fastq.gz . &&
 
-# Loop to rename fastqc
+# Loop to rename fastq
 for i in *.fastq.gz
   do name=$(echo $i | sed 's/F-QUALITY_PASSED_R//g')
 	mv $i $name
