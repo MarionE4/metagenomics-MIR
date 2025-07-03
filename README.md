@@ -45,13 +45,13 @@ singularity run -B /appli -B path/to/tool/checkm2/1.0.1/ -B $DATAWORK  ${CHECKM2
 Taxonomic assignment was performed on all 625 MAGs using the GTDB-Tk v.2.4.0 tool (Chaumeil et al., 2020). The *-x* argument adds the file extension (here fasta), *--cpus* adds the number of threads and\
 *--skip_ani_screen* allow to skip comparison genome ANI with Mash database, a time-consuming stage and unecessary for us.
 
-```{bash}
+``` bash
 gtdbtk classify_wf --genome_dir 01_FASTA/REFORMATED --out_dir 03_TAXONOMY/GTDB-Tk -x fa --cpus 56 --skip_ani_screen 
 ```
 
 After that, a quality filter was set to \>70% completion and \<5% redundancy and a symbolic link was created in order to work with good quality MAGs. Two files with *Zetaproteobacteria* (a class of neutrophilic iron-oxidizing bacteria) was created too.
 
-```{bash}
+``` bash
 cd 04_MAGs
 
 # Create a file with all Zetaproteobacteria MAGs
@@ -75,12 +75,12 @@ Selected MAGs were annotated using Prokka v.1.14.6 (Seemann, 2014) and KEGG Kofa
 
 ### Prokka v.1.14.6
 
-These argument was used: \
+These argument was used:\
 *-o* displays only the part of the text corresponding to the selection that follows; without *-o*, the entire line containing the selection would be displayed.\
 *-P* activates Perl-compatible regular expressions mode, enabling you to use the *\\d+* (digits) expression, among others.\
 *\^bin* searches for a name starting with bin and *\\d+* retrieves all digits following bin.
 
-```{bash}
+``` bash
 # Workflow Prokka
 for i in ../04_MAGs/MAGs_SELECTED/*.fa
 do 
@@ -94,7 +94,7 @@ done
 
 We need to create the *contigs.db* (database) for each MAG before run loop annotation.
 
-```{bash}
+``` bash
 # Creation of contigs.db
 for i in MAGs_SELECTED/*.fa
 do 
@@ -115,7 +115,7 @@ These argument was used:\
 *-bin_ext* for extension argument (here fasta)*\
 -T* for number of threads
 
-```{bash}
+``` bash
 # Workflow FeGenie
 FeGenie.py -bin_dir ../04_MAGs/MAGs_SELECTED/ -bin_ext fa -out fegenie -T 24
 ```
