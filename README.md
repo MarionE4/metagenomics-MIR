@@ -1,6 +1,6 @@
 # MIR zone metagenomic analysis
 
-Iron rich microbial mat at MIR, a low-temperature active deep-sea hydrothermal zone, was collected during 2 oceanographic campaign: HERMINE 2 (2022; DOI: [10.17600/18001851](https://doi.org/10.17600/18001851)) and BICOSE 3 (2023; [10.17600/18002399](https://doi.org/10.17600/18002399)). These samples are composed of sediments (HER2_PL2064-22\_**PBT2** and BIC3-PL2090-08-**PBT3**) or microbial mats (BIC3-PL2090-08-**PLUME4** and BIC3-PL2090-08-**PLUME6**). A co-assembly of these samples allowed the reconstruction of 625 Metagenome-assembled genomes (MAGs) before my master 2 internship. My goal during my internship was to start metagenomic analysis of microbial communities in MIR zone with DATARMOR server (Ifremer) and RSutdio.
+Iron rich microbial mat at MIR, a low-temperature active deep-sea hydrothermal zone, was collected during 2 oceanographic campaign: HERMINE 2 (2022; DOI: [10.17600/18001851](https://doi.org/10.17600/18001851)) and BICOSE 3 (2023; [10.17600/18002399](https://doi.org/10.17600/18002399)). These samples are composed of sediments (HER2_PL2064-22\_**PBT2** and BIC3-PL2090-08-**PBT3**) or microbial mats (BIC3-PL2090-08-**PLUME4** and BIC3-PL2090-08-**PLUME6**). A co-assembly of these samples allowed the reconstruction of 625 Metagenome-assembled genomes (MAGs) before my master 2 internship. My goal during my internship was to start metagenomic analysis of microbial communities and *Zetaproteobacteria* (a class of neutrophilic iron-oxidizing bacteria) in MIR zone with DATARMOR server (Ifremer) and RStudio.
 
 ## Rename and reformat MAGs
 
@@ -49,7 +49,70 @@ Taxonomic assignment was performed on all 625 MAGs using the GTDB-Tk v.2.4.0 too
 gtdbtk classify_wf --genome_dir 01_FASTA/REFORMATED --out_dir 03_TAXONOMY/GTDB-Tk -x fa --cpus 56 --skip_ani_screen 
 ```
 
-After that, a quality filter was set to \>70% completion and \<5% redundancy and a symbolic link was created in order to work with good quality MAGs. Two files with *Zetaproteobacteria* (a class of neutrophilic iron-oxidizing bacteria) was created too.
+After that, to define the quality filter, a step in RStudio was done to test a bunch of quality threshold (completion and redundancy).
+
+```{r}
+# Packages
+library(dplyr)
+library(tidyr)
+library(formatR)
+library(tibble)
+```
+
+We need to load the quality file and taxonomy files.
+
+```{r}
+# Load quality file, retrieve columns of interest and sort lines by MAGs name
+checkm2 <- read.table("quality_report.tsv", header=TRUE, sep="\t")
+checkm2_simplify <- select(checkm2, Name, Completeness, Contamination)
+checkm2_simplify <- arrange(checkm2_simplify, Name)
+
+# Load the taxonomy files and merge the 2 tables (archeae and bacteria) before arranging the lines according to the MAGs names.
+taxo_b <- read.table(file = "gtdbtk.bac120.summary.tsv", header = TRUE, sep = "\t")
+taxo_a <- read.table(file = "gtdbtk.ar53.summary.tsv", header = TRUE, sep = "\t")
+taxo <- add_row(taxo_b, taxo_a)
+taxo <- arrange(taxo, user_genome)
+```
+
+And then merged quality file, with MAGs name, completion and redundancy, and taxonomy file.
+
+```{r}
+Classification <- taxo$classification
+MAGs_all <- add_column(checkm2_simplify, Classification)
+```
+
+Now we can test different quality filter and see how much *Zetaproteobacteria* we can work with.
+
+```{r}
+ninety_5 <- filter(MAGs_all, Completeness > 90, Contamination < 5) 
+eighty_5 <- filter(checkm2_simplify, Completeness > 80, Contamination < 5)
+seventy_5 <- filter(MAGs_all, Completeness > 70, Contamination < 5)
+fivety_5 <- filter(checkm2_simplify, Completeness > 50, Contamination < 5)
+sixty_5 <- filter(checkm2_simplify, Completeness > 60, Contamination < 5)
+
+ninety_10 <- filter(checkm2_simplify, Completeness > 90, Contamination < 10)
+eighty_10 <- filter(checkm2_simplify, Completeness > 80, Contamination < 10)
+seventy_10 <- filter(checkm2_simplify, Completeness > 70, Contamination < 10)
+fivety_10 <- filter(checkm2_simplify, Completeness > 50, Contamination < 10)
+sixty_10 <- filter(checkm2_simplify, Completeness > 60, Contamination < 10)
+```
+
+The quality filter was set to \>70% completion and \<5% redundancy for "good quality" MAGs (MQ) and a file with high quality MAGs (HQ) was created too.
+
+```{r}
+MAGs_HQ <- filter(MAGs_all, Completeness > 90, Contamination < 5) #ninety_5
+MAGs_MQ <- filter(MAGs_all, Completeness > 70, Contamination < 5) #seventy_5
+```
+
+And files were downloaded.
+
+```{r}
+write.table(MAGs_all, file='MAGs_all.tsv', quote = FALSE, sep = "\t", col.names = NA)
+write.table(MAGs_MQ, file='MAGs_MQ.tsv', quote = FALSE, sep = "\t", col.names = NA)
+write.table(MAGs_HQ, file='MAGs_HQ.tsv', quote = FALSE, sep = "\t", col.names = NA)
+```
+
+A symbolic link in DATARMOR was created in order to work with "good quality" MAGs (MQ). Two files with *Zetaproteobacteria* was created too.
 
 ``` bash
 cd 04_MAGs
@@ -119,3 +182,7 @@ These argument was used:\
 # Workflow FeGenie
 FeGenie.py -bin_dir ../04_MAGs/MAGs_SELECTED/ -bin_ext fa -out fegenie -T 24
 ```
+
+### *grcJ* research (HMM profile)
+
+*grcJ* is a potential periplasmic electron transporter involved in iron-oxidation (energetic metabolism) discovered in *Ghiorsea bivora* (*Zetaproteobacteria*) by Barco *et al.* in 2024. This gene was not in FeGenie so i decided to create a HMM profile for *grcJ* with HMMER v.3.3.2 (Eddy, 2023) in order to research it in "good quality" MAGs (MQ).
