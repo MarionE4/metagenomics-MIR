@@ -1,0 +1,342 @@
+---
+title: "Mise en forme tableau"
+author: "Marion Ménec"
+date: "2025-02-28"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Anvi-estimate-metabolism
+
+Répertoire de travail
+```{r}
+setwd("path/to/repertory")
+```
+
+Chargement des librairies
+```{r}
+library(tidyr)
+library(dplyr)
+```
+
+Chargement du tableau
+```{r}
+Tab_brut_meta <- read.table("metabolism_modules.txt", sep = "\t", header = TRUE)
+```
+
+Mettre les colonnes qui m'intéressent dans un nouveau tableau
+```{r}
+completion_pathway_1 <- Tab_brut_meta %>% select(module, module_name, bin_name, pathwise_module_completeness)
+```
+
+Réarranger les données
+```{r}
+completion_pathway_2 <- pivot_wider(completion_pathway_1, names_from = bin_name, values_from = pathwise_module_completeness)
+```
+
+Mettre un nom plus cool pour les bins
+```{r}
+completion_pathway_cool <- completion_pathway_2 %>% rename_with(~ gsub("_.*", "", .x), .cols = -module_name)
+```
+
+Maintenant on va faire un tableau avec seulement les MAGs de Zetaproteobacteria
+```{r}
+liste_zeta <- readLines("liste_zeta.txt")
+completion_pathway_zeta <- completion_pathway_2 %>% select(all_of(liste_zeta))
+completion_pathway_zeta_cool <- completion_pathway_zeta %>% rename_with(~ gsub("_.*", "", .x), .cols = -module_name)
+```
+
+Exporter les tableau pour pouvoir les lire (.csv)
+```{r}
+write.table(completion_pathway_2, "completion_pathway.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(completion_pathway_cool, "completion_pathway_short_bin.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(completion_pathway_zeta, "completion_pathway_zeta.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(completion_pathway_zeta_cool, "completion_pathway_zeta_short_bin.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+```
+
+## Mise en forme tableau de Taxonomie général
+
+Répertoire de travail
+```{r}
+setwd(""path/to/repertory"")
+```
+
+Chargement des librairies
+```{r}
+library(tidyr)
+library(dplyr)
+```
+
+Charger le tableau dans RStudio
+```{r}
+MAGs_MQ <- read.table("../MAGs/MAGs_MQ.tsv", header = TRUE, sep="\t")
+```
+
+Faire un tableau qu'avec le nom des bins et la taxonomie
+```{r}
+bin_taxo <- select(.data = MAGs_MQ, Name, Classification)
+```
+
+Comptage phylum
+```{r}
+Taxo_generale_p <- bin_taxo %>%
+  separate(Classification, into = c("domain", "phylum"), sep = ";", extra = "drop") %>%
+  mutate(Domaine = sub("d__", "", domain),
+         Phylum = sub("p__", "", phylum)) %>%
+  count(Domaine, Phylum, name = "Nombre de MAGs") %>%
+  arrange(desc(`Nombre de MAGs`))
+```
+
+```{r}
+write.table(Taxo_generale_p, "Taxo_generale_p.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+```
+
+
+Comptage classe
+```{r}
+Taxo_generale_c <- bin_taxo %>%
+  separate(Classification, into = c("domain", "phylum", "classe"), sep = ";", extra = "drop") %>%
+  mutate(Phylum = sub("p__", "", phylum), 
+         Classe = sub("c__", "", classe)) %>%
+  count(Phylum, Classe, name = "Nombre de MAGs") %>%
+  arrange(desc(`Nombre de MAGs`))
+```
+
+Comptage ordre
+```{r}
+Taxo_generale_o <- bin_taxo %>%
+  separate(Classification, into = c("domain", "phylum", "classe", "ordre"), sep = ";", extra = "drop") %>%
+  mutate(Phylum = sub("p__", "", phylum), 
+         Classe = sub("c__", "", classe), 
+         Ordre = sub("o__", "", ordre)) %>%
+  count(Phylum, Classe, Ordre, name = "Nombre de MAGs") %>%
+  arrange(desc(`Nombre de MAGs`))
+```
+
+# Tableau Zeta
+Répertoire de travail
+```{r}
+setwd("path/to/repertory")
+```
+
+Charger le tableau dans RSutdio
+```{r}
+zeta_MQ <- read.table("../MAGs/zeta_MQ.tsv", sep="\t")
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(purrr)
+```
+
+Création du tableau permettant d'avoir la taxo de chaque MAGs de Zeta
+```{r}
+zeta_taxo <- zeta_MQ %>%
+  separate(V4, into = c("d", "p", "c", "o", "f", "g", "s"), sep = ";", fill = "right", extra = "drop") %>%
+  mutate(across(d:s, ~ ifelse(. == "" | str_detect(., "__$"), NA, .))) %>%  # Remplace les valeurs vides par NA
+  pivot_longer(cols = d:s, names_to = "rank", values_to = "taxonomy", values_drop_na = TRUE) %>%
+  group_by(V1) %>%
+  slice_tail(n = 1) %>%  # Garde le dernier rang taxonomique non NA
+  mutate(rank = case_when(
+    rank == "d" ~ "Domaine",
+    rank == "p" ~ "Phylum",
+    rank == "c" ~ "Classe",
+    rank == "o" ~ "Ordre",
+    rank == "f" ~ "Famille",
+    rank == "g" ~ "Genre",
+    rank == "s" ~ "Espèce")) %>%
+  ungroup()
+```
+
+Petite mise en forme des noms dans le tableau
+```{r}
+zeta_taxo <- zeta_taxo %>%
+  mutate(zeta_taxo, taxonomy = str_replace_all(taxonomy, "^g__|^f__", "")) %>%  # Enlève les préfixes "g__" et "f__" 
+  mutate(V1 = str_split(V1, "_") %>% map_chr(1)) %>%
+  rename("Nom du MAG" = V1, Complétion = V2, Redondance = V3, "Rang taxonomique" = rank, Taxonomie = taxonomy)
+```
+
+## Fichier annotation taxo des Zeta référence sur GTDB 
+
+```{r}
+setwd("path/to/repertory")
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(purrr)
+```
+
+Charger le tableau dans RSutdio
+```{r}
+gtdb <- read.csv("Annotations_zeta_gtdbtk.csv", sep = "\t")
+```
+
+Création du tableau permettant d'avoir la taxo la plus avancé de chaque génome de ref
+```{r}
+gtdb_1 <- gtdb %>%
+  separate(gtdb_taxonomy, into = c("d", "p", "c", "o", "f", "g", "s"), sep = ";", fill = "right", extra = "drop") %>%
+  group_by(accession) %>%
+  mutate(taxonomy = coalesce(s, g, f, o, c, p, d)) %>%
+  mutate(taxonomy = str_trim(taxonomy)) %>%  # Permet de nettoyer les espaces avant "s__"
+  mutate(taxonomy = str_replace_all(taxonomy, "^s__", "")) %>%
+  mutate(accession = if_else(str_detect(accession, "^GCA_"), 
+                            paste0("GB_", accession), 
+                            accession)) %>%
+  mutate(accession = if_else(str_detect(accession, "^GCF_"), 
+                            paste0("RS_", accession), 
+                            accession)) %>%
+  select(accession, taxonomy)
+```
+
+```{r}
+write.table(gtdb_1, "gtdb_ref_taxo.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+```
+Ne pas oublier de rajouter le noms des bins et le noms des outgroups dans le tableau avant de passer à l'étape suivante.
+
+
+### Changements des numéros d'accession dans le fichier zeta.contree afin de les remplacer par les noms des espèces de références.
+
+```{r}
+library(ape)
+library(dplyr)
+library(readr)
+```
+
+```{r}
+# Charger l'arbre
+tree <- read.tree("zeta.treefile")
+
+# Charger le fichier de correspondance accession <-> taxonomy
+metadata <- read_tsv("gtdb_ref_taxo.tsv")  
+```
+
+
+```{r}
+# Vérifier les correspondances
+head(tree$tip.label)  # Affiche les noms actuels dans l'arbre
+head(metadata)  # Vérifie les colonnes accession et taxonomy
+
+# Création d'un dictionnaire de correspondance
+name_dict <- setNames(metadata$taxonomy, metadata$accession)
+
+# Remplacement des accession numbers par les noms d'espèces
+tree$tip.label <- name_dict[tree$tip.label]
+
+# Vérifier si tout a bien été remplacé
+head(tree$tip.label)
+
+```
+
+Créer le fichier de l'arbre avec les bon noms
+```{r}
+write.tree(tree, file = "zeta_v2.treefile")
+```
+
+## On va faire pareil avec l'arbre général 
+
+```{r}
+library(ape)
+library(dplyr)
+library(readr)
+```
+
+Première étape faire un fichier metadata avec les noms pourries des 262 bins et leur jolies noms :)
+
+```{r}
+liste <- read.table("liste_nom_bin.txt", header = TRUE)
+```
+
+Mainteant on rajoute une colonne avec les noms plus court
+```{r}
+library(dplyr)
+library(stringr)
+
+liste <- liste %>%
+  mutate(
+    # Supprimer le début "bin_" pour garder le reste du nom
+    without_prefix = str_remove(name, "bin_"),
+
+    # Garder les chiffres en supprimant tout ce qui n'est pas un chiffre
+    extracted_number = str_extract(without_prefix, "[0-9]+"),
+
+    # Créer le nom court en ajoutant "Bin_" devant le numéro extrait
+    short_name = paste0("Bin_", extracted_number)
+  ) %>%
+  select(name, short_name)  # Garder uniquement les colonnes nécessaires
+
+```
+
+
+```{r}
+# Charger l'arbre avec read.nexus (read.tree pense que c'est un multiphylo...)
+tree <- read.nexus("bacteria_trim.fasta.treefile")
+class(tree)
+```
+
+
+```{r}
+# Vérifier les correspondances
+head(tree$tip.label)  # Affiche les noms actuels dans l'arbre
+head(liste)  # Vérifie les colonnes accession et taxonomy
+
+# Création d'un dictionnaire de correspondance
+name_dict <- setNames(liste$short_name, liste$name)
+
+# Remplacement des accession numbers par les noms d'espèces
+tree$tip.label <- name_dict[tree$tip.label]
+
+# Vérifier si tout a bien été remplacé
+head(tree$tip.label)
+
+```
+
+Créer le fichier de l'arbre général avec les bon noms et un fichier avec la liste
+```{r}
+write.tree(tree, file = "general_v1.treefile")
+write.table(liste, file = "liste_nom_bin.txt", sep = "\t")
+```
+
+## Tableau KSB1
+
+```{r}
+setwd("D:/Documents/FAC/Master/Stage M2/Code/Mise en forme tableau")
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(purrr)
+```
+
+
+```{r}
+MAGs_all <- read.table("MAGs_all.tsv", sep = "\t", header = TRUE, )
+```
+
+
+```{r}
+KSB1 <- filter(MAGs_all, Classification == "KSB1")
+```
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+

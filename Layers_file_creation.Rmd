@@ -1,0 +1,95 @@
+---
+title: "Couches"
+author: "Marion Ménec"
+date: "2025-03-25"
+output: html_document
+---
+
+Répertoire de travail
+```{r}
+setwd("D:/Documents/FAC/Master/Stage M2/Code/Arbre/General/Couches")
+```
+
+Chargement des librairies
+```{r}
+library(tidyr)
+library(dplyr)
+library(data.table)
+library(stringr)
+library(formatR)
+library(imputeTS)
+```
+
+### Chargement de tous les tableaux 
+
+```{r}
+checkm2 <- read.table("quality_report.tsv", sep = "\t", header = T)
+gtdb_bac <- read.table("gtdbtk.bac120.summary.tsv", sep = "\t", header = T)
+gtdb_ar <- read.table("gtdbtk.ar53.summary.tsv", sep = "\t", header = T)
+fegenie <- read.table("FeGenie-heatmap-data.csv", sep = ",", header = T)
+abundance <- read.table("abundance.txt", sep = "\t", header = T )
+```
+
+### Récupérer la qualité
+```{r}
+checkm2 <- checkm2 %>% select(Name, Completeness, Contamination)
+```
+
+### Récupérer la taxonomie
+```{r}
+gtdb_bac_1 <- gtdb_bac %>%
+  separate(classification, into = c("domain", "phylum", "classe"), sep = ";", extra = "drop") %>%
+  mutate(Phylum = sub("p__", "", phylum), 
+         Classe = sub("c__", "", classe)) %>%
+  select(user_genome, Phylum, Classe)
+```
+
+```{r}
+gtdb_ar_1 <- gtdb_ar %>%
+  separate(classification, into = c("domain", "phylum", "classe"), sep = ";", extra = "drop") %>%
+  mutate(Phylum = sub("p__", "", phylum), 
+         Classe = sub("c__", "", classe)) %>%
+  select(user_genome, Phylum, Classe)
+```
+
+### Récupérer la heat map de Fegenie
+Mettre le tableau dans le bon sens
+```{r}
+fegenie <- pivot_longer(fegenie, cols=2:259, names_to="Name", values_to="values")
+fegenie <- pivot_wider(fegenie, names_from = X, values_from = values)
+```
+
+```{r}
+fegenie$Name <- sub(".fa", "", fegenie$Name)
+fegenie <- select(fegenie, Name, iron_oxidation, iron_reduction)
+```
+
+### Récupérer le tableau d'abondance dans les échantillons 
+```{r}
+abundance$bins <- paste0(abundance$bins, "_reformated")
+```
+
+
+### Rassembler les tableaux
+```{r}
+super_tableau <- merge(abundance, checkm2, by.x = "bins", by.y = "Name")
+super_tableau <- merge(super_tableau, gtdb_bac_1, by.x = "bins", by.y = "user_genome", all.x = TRUE)
+super_tableau <- merge(super_tableau, fegenie, by.x = "bins", by.y = "Name", all.x = TRUE) #all.x permet de merger les tableaux sur les lignes du tableau x
+super_tableau <- na_replace(super_tableau, 0)
+super_tableau$iron_oxidation <- as.numeric(super_tableau$iron_oxidation)
+super_tableau$iron_reduction <- as.numeric(super_tableau$iron_reduction)
+```
+
+
+### Télécharger le joli tableau
+```{r}
+write.table(super_tableau, "couches.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+```
+
+
+
+
+
+
+
+
